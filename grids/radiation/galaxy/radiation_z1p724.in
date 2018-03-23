@@ -1,0 +1,22 @@
+##Abundances
+abundances GASS10 no grains
+metals 0.0 log vary
+grid range from -4.0 to -0.8 with 0.2 dex increments
+element scale factor Helium 1 linear vary
+grid range from 0.75 to 1.25 with 0.02 increments linear
+##Geometry/density
+hden 0.0 vary
+grid range from -4.6 to 0.2 with 0.2 dex increments
+##Radiation
+cmb, z=1.724
+table HM12 redshift 1.724 
+table star "sfr1_ge_z014.mod" age=1e8 years 
+intensity -3.415811
+##StopSave
+stop neutral column density 15.0 vary
+grid range from 15 to 18.2 with 0.2 dex increments
+stop temperature off
+iterate to convergence
+save grid "radiation_z1p724_gal.grd"
+save last species ALL column densities "radiation_z1p724_gal.clm"
+save last ionization means "radiation_z1p724_gal.ion"
