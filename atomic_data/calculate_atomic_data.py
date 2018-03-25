@@ -152,21 +152,44 @@ plt.plot(xplt, np.zeros(xplt.size), 'r-')
 plt.show()
 
 textab = open("table.tex", 'w')
+tablines = []
 print((fvlarr-10.0**fmodel)/10.0**fmodel)
 print((gamarr-10.0**gmodel)/10.0**gmodel)
 print("-------------------")
 for i in range(wavarr.size):
     if fvlarr[i] == -1.0:
         fv = 10.0**fmodel[i]
-        fstr = "*"
+        fstr = "^{a}"
     else:
         fv = fvlarr[i]
         fstr = ""
     if gamarr[i] == -1.0:
         gv = 10.0**gmodel[i]
-        gstr = "*"
+        gstr = "^{a}"
     else:
         gv = gamarr[i]
         gstr = ""
+    if np.log10(fv) > -1.0: fvs = "{0:.4f}".format(fv)
+    elif np.log10(fv) > -2.0: fvs = "{0:.5f}".format(fv)
+    elif np.log10(fv) > -3.0: fvs = "{0:.6f}".format(fv)
+    elif np.log10(fv) > -4.0: fvs = "{0:.7f}".format(fv)
+    tablines.append("        He\\,\\textsc{i}" + "& ${0:.4f}$ & ${1:s}{3:s}$ & {2:4.3E}${4:s}$\\\\\n".format(wavarr[i], fvs, gv, fstr, gstr))
     print("He I   {0:.4f} {1:f}{3:s}  {2:E}{4:s}".format(wavarr[i], fv, gv, fstr, gstr))
 print("* = extrapolated value")
+
+textab.write("\\begin{table}\n")
+textab.write("    \\centering\n")
+textab.write("    \\caption{This is an example table. Captions appear above each table.}\n")
+textab.write("    \\label{tab:atomic}\n")
+textab.write("    \\begin{tabular}{lccc}\n")
+textab.write("        \\hline\n")
+textab.write("        Ion & wavelength & $f$ & $\\Gamma$\\\\\n")
+textab.write("            & (\\AA)     &     & $({\\rm s}^{-1})$\\\\\n")
+textab.write("        \\hline\n")
+for i in tablines:
+    textab.write(i)
+textab.write("        \\hline\n")
+textab.write("    \\end{tabular}\n\n")
+textab.write("$^{\\rm a}${No atomic data exist for these transitions. Instead, these values were extrapolated based on a polynomial fit to the known measures from lower order lines (see text).}\\\\\n")
+textab.write("\\end{table}\n")
+textab.close()
