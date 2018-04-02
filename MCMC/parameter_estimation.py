@@ -35,13 +35,14 @@ allmodel = np.load(filename)
 # Extract the columns that are of interest to us
 Ndims = 5  # Number of parameters to estimate
 Hcol = allmodel[:, Ndims] + allmodel[:, Ndims+1]
-Hecol = allmodel[:, Ndims+2] + allmodel[:, Ndims+3]+allmodel[:, Ndims+4]
+Hecol = allmodel[:, Ndims+2] + allmodel[:, Ndims+3] + allmodel[:, Ndims+4]
 model_slp = allmodel[:, 0]
 model_met = allmodel[:, 1]
 model_yp = allmodel[:, 2] * np.median((Hecol/Hcol)/allmodel[:, 2])
 model_hden = allmodel[:, 3]
 model_NHI = allmodel[:, 4]
 
+mn_sic, mx_sic = -1.0, 1.0   # [Si/C] ratio
 mn_slp, mx_slp = np.min(model_slp), np.max(model_slp)
 mn_met, mx_met = np.min(model_met), np.max(model_met)
 mn_yp, mx_yp = np.min(model_yp), np.max(model_yp)
@@ -86,17 +87,20 @@ pdb.set_trace()
 def get_model(theta):
     model = np.zeros(Ncol)
     for ii in range(Ncol):
-        model[ii] = model_cden[ii]([[theta]])
+        model[ii] = model_cden[ii]([[theta[1:]]])
+        if 'Si' in yn[ii]:
+            model[ii] += theta[0]
     return model
 
 
 # Define the probability function as likelihood * prior.
 def lnprior(theta):
-    s, m, y, n, h = theta
+    r, s, m, y, n, h = theta
     if mn_met <= m <= mx_met and \
        mn_yp <= y <= mx_yp and \
        mn_hden <= n <= mx_hden and \
        mn_NHI <= h <= mx_NHI and \
+       mn_sic <= r <= mx_sic and \
        mn_slp <= s <= mx_slp:
         return 0.0
     return -np.inf
@@ -125,7 +129,7 @@ bst = np.argsort(chisq)
 printbst = 1
 for i in range(printbst):
     print("""------------------------\n
-        Maximum likelihood result {4:d}/{5:d} {6:.4f}:\n
+        Maximum likelihood result {5:d}/{6:d} {7:.4f}:\n
         [M/H]  = {0}\n
         yp     = {1}\n
         n(H)   = {2}\n
@@ -142,7 +146,8 @@ ndim, nwalkers = 4, 100
 # minv_ms, maxv_ms = np.min(model_ms[bst[:printbst]]), np.max(model_ms[bst[:printbst]])
 # minv_ex, maxv_ex = np.min(model_ex[bst[:printbst]]), np.max(model_ex[bst[:printbst]])
 # minv_mx, maxv_mx = np.min(model_mx[bst[:printbst]]), np.max(model_mx[bst[:printbst]])
-pos = [np.array([np.random.uniform(mn_slp, mx_slp),
+pos = [np.array([np.random.uniform(mn_sic, mx_sic),
+                 np.random.uniform(mn_slp, mx_slp),
                  np.random.uniform(mn_met, mx_met),
                  np.random.uniform(mn_yp, mx_yp),
                  np.random.uniform(mn_hden, mx_hden),
