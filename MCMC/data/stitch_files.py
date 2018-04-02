@@ -1,7 +1,7 @@
 import numpy as np
 
 prefix = 'radiation_z1p724_uvbslope'
-slopes = ['-0.5', '0.0', '+0.5']
+slopes = ['-0.5', '0.0', '0.5']
 
 cd_nam = ['H', 'H+',
           'He', 'He+', 'He+2',
@@ -68,7 +68,7 @@ for i in cd_nam:
 stchdata = None
 for slope in slopes:
     fname = '{0:s}{1:s}'.format(prefix, slope)
-    print('Loading {0:s}'.format(fname))
+    print('Preparing to stitch {0:s}'.format(fname))
     metals, hescl, hden, NHI = np.loadtxt(fname + '.grd', unpack=True, usecols=(6, 7, 8, 9))
     slps = np.ones_like(metals) * float(slope)
 
