@@ -3,16 +3,11 @@
 
 from __future__ import print_function
 
+import time
 import emcee
-import corner
 import numpy as np
-import scipy.optimize as op
-import matplotlib.pyplot as pl
-from matplotlib.ticker import MaxNLocator
-from scipy.interpolate import RegularGridInterpolator
-import plotting_routines as pr
+from scipy.interpolate import RegularGridInterpolator, LinearNDInterpolator
 import sys
-import pdb
 
 cd_nam = ['H', 'H+',
           'He', 'He+', 'He+2',
@@ -88,17 +83,29 @@ if len(yi) != len(yn):
     print("Error with column density names")
     sys.exit()
 
-print("Preparing model grids")
-XS, XM, XY, XH, XN = np.meshgrid(unq_slp, unq_met, unq_yp, unq_hden, unq_NHI, indexing='ij')
-print("Interpolating model grids")
-pts = [unq_slp, unq_met, unq_yp, unq_hden, unq_NHI]
-model_cden = []
-for i in range(Ncol):
-    print("{0:d}/{1:d}".format(i+1, Ncol))
-    vals = value_cden[i].reshape((unq_slp.size, unq_met.size, unq_yp.size, unq_hden.size, unq_NHI.size))
-    model_cden.append(RegularGridInterpolator(pts, vals, method='linear', bounds_error=False, fill_value=np.inf))
-    # model_cden.append(LinearNDInterpolator(pts, value_cden[i], fill_value=np.inf))
-print("Complete")
+if True:
+    # This routine is faster
+    print("Preparing model grids")
+    XS, XM, XY, XH, XN = np.meshgrid(unq_slp, unq_met, unq_yp, unq_hden, unq_NHI, indexing='ij')
+    print("Interpolating model grids")
+    pts = [unq_slp, unq_met, unq_yp, unq_hden, unq_NHI]
+    model_cden = []
+    for i in range(Ncol):
+        print("{0:d}/{1:d}".format(i+1, Ncol))
+        vals = value_cden[i].reshape((unq_slp.size, unq_met.size, unq_yp.size, unq_hden.size, unq_NHI.size))
+        model_cden.append(RegularGridInterpolator(pts, vals, method='linear', bounds_error=False, fill_value=np.inf))
+        # model_cden.append(LinearNDInterpolator(pts, value_cden[i], fill_value=np.inf))
+    print("Complete")
+else:
+    # This routine is slower
+    print("Interpolating model grids")
+    model_cden = []
+    pts = np.array((model_slp, model_met, model_yp, model_hden, model_NHI )).T
+    for i in range(Ncol):
+        # s, m, y, n, h = theta
+        # ['H', 'He', 'C+', 'C+3', 'Si+', 'Si+3']
+        model_cden.append(LinearNDInterpolator(pts, value_cden[i], fill_value=np.inf))
+    print("Complete")
 
 
 def get_model(theta):
@@ -153,9 +160,10 @@ for i in range(printbst):
         N(H I) = {3}\n
         slope  = {4}\n""".format(model_met[bst[i]], model_yp[bst[i]], model_hden[bst[i]], model_NHI[bst[i]],
                                  model_slp[bst[i]], i+1, printbst, chisq[bst[i]]))
+modvals = [0.0, model_slp[bst[i]], model_met[bst[i]], model_yp[bst[i]], model_hden[bst[i]], model_NHI[bst[i]]]
 
 # Set up the sampler.
-ndim, nwalkers = 4, 100
+ndim, nwalkers = 6, 100
 # maxlike = np.array([model_ms[bst], model_ex[bst], model_mx[bst]])
 # minv_ms, maxv_ms = 19.0, 22.0
 # minv_ex, maxv_ex = 1.0, 5.0
@@ -169,88 +177,17 @@ pos = [np.array([np.random.uniform(mn_sic, mx_sic),
                  np.random.uniform(mn_yp, mx_yp),
                  np.random.uniform(mn_hden, mx_hden),
                  np.random.normal(y[0], ye[0])]) for i in range(nwalkers)]
-sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(x, y, ye), threads=6)
+sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(x, y, ye), threads=ndim)
 
 # Clear and run the production chain.
 print("Running MCMC...")
-nmbr = 10000
+nmbr = 100
+a=time.time()
 for i, result in enumerate(sampler.run_mcmc(pos, nmbr, rstate0=np.random.get_state())):
-    if (i+1) % 100 == 0:
+    if True:#(i+1) % 100 == 0:
         print("{0:5.1%}".format(float(i) / nmbr))
 print("Done.")
+print((time.time()-a)/60.0, 'mins')
 
 print("Saving samples")
-burnin = 500
-samples = sampler.chain[:, burnin:, :].reshape((-1, ndim))
-np.save("samples.npy", samples)
-
-pdb.set_trace()
-
-pl.clf()
-fig, axes = pl.subplots(3, 1, sharex=True, figsize=(8, 9))
-axes[0].plot(sampler.chain[:, :, 0].T, color="k", alpha=0.4)
-axes[0].yaxis.set_major_locator(MaxNLocator(5))
-axes[0].axhline(model_ms[bst[0]], color="#888888", lw=2)
-axes[0].set_ylabel("$mass$")
-
-axes[1].plot(sampler.chain[:, :, 1].T, color="k", alpha=0.4)
-axes[1].yaxis.set_major_locator(MaxNLocator(5))
-axes[1].axhline(model_ex[bst[0]], color="#888888", lw=2)
-axes[1].set_ylabel("$explosion energy$")
-
-axes[2].plot(sampler.chain[:, :, 2].T, color="k", alpha=0.4)
-axes[2].yaxis.set_major_locator(MaxNLocator(5))
-axes[2].axhline(model_mx[bst[0]], color="#888888", lw=2)
-axes[2].set_ylabel("$mixing$")
-axes[2].set_xlabel("step number")
-
-fig.tight_layout(h_pad=0.0)
-
-pdb.set_trace()
-fig.savefig("time_evolution.png")
-
-# Make the triangle plot.
-burnin = 500
-samples = sampler.chain[:, burnin:, :].reshape((-1, ndim))
-samples = np.load('samples100000.npy')
-levels = 1.0 - np.exp(-0.5 * np.arange(1.0, 2.1, 1.0) ** 2)
-contour_kwargs, contourf_kwargs = dict({}), dict({})
-contour_kwargs["linewidths"] = [1.0,1.0]
-contourf_kwargs["colors"] = ((1,1,1), (0.6, 0.6, 0.6), (0.3, 0.3, 0.3))
-fig = corner.corner(samples, bins=[200,50,50], levels=levels, plot_datapoints=False, fill_contours=True, plot_density=False, contour_kwargs=contour_kwargs, contourf_kwargs=contourf_kwargs, smooth=1, labels=[r"${\rm Mass}~(M_{\odot})$", r"$E_{\rm exp}~(10^{51}~{\rm erg})$", r"${\rm Mixing}$"])
-axes = np.array(fig.axes).reshape((3, 3))
-[axes[i,0].set_xlim(18.0,23.0) for i in range(3)]
-[axes[i,1].set_xlim(0.3,10.0) for i in range(3)]
-[axes[i,2].set_xlim(0.0,0.25) for i in range(3)]
-axes[1,0].set_ylim(0.3,10.0)
-[axes[2,i].set_ylim(0.0,0.25) for i in range(2)]
-[l.set_rotation(0) for l in axes[0,0].get_yticklabels()]
-[l.set_rotation(0) for l in axes[1,0].get_yticklabels()]
-[l.set_rotation(0) for l in axes[2,0].get_yticklabels()]
-[l.set_rotation(0) for l in axes[2,0].get_xticklabels()]
-[l.set_rotation(0) for l in axes[2,1].get_xticklabels()]
-[l.set_rotation(0) for l in axes[2,2].get_xticklabels()]
-[axes[i,i].yaxis.set_ticks_position('none') for i in range(3)]
-[axes[2,i].xaxis.set_label_coords(0.5, -0.18) for i in range(3)]
-[axes[i,0].yaxis.set_label_coords(-0.25, 0.5) for i in range(1,3)]
-axes[2,0].set_xticks([19.0, 20.0, 21.0, 22.0])
-axes[2,2].set_xticks([0.0, 0.1, 0.2])
-axes[2,0].set_yticks([0.0, 0.1, 0.2])
-axes[2,1].set_yticks([0.0, 0.1, 0.2])
-pr.replot_ticks(axes[1,0])
-pr.replot_ticks(axes[2,0])
-pr.replot_ticks(axes[2,1])
-fig.savefig("parameter_estimation.pdf")
-
-[([tk.set_visible(True) for tk in ax.get_yticklabels()], [tk.set_visible(True) for tk in ax.get_yticklabels()]) for ax in axes.flatten()]
-
-# Compute the quantiles.
-samples[:, 2] = np.exp(samples[:, 2])
-ms_mcmc, ex_mcmc, mx_mcmc = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
-                             zip(*np.percentile(samples, [16, 50, 84],
-                                                axis=0)))
-print("""MCMC result:
-    mass = {0[0]} +{0[1]} -{0[2]})
-    expl = {1[0]} +{1[1]} -{1[2]})
-    mixn = {2[0]} +{2[1]} -{2[2]})
-""".format(ms_mcmc, ex_mcmc, mx_mcmc))
+np.save("samples{0:d}.npy".format(nmbr), sampler.chain)
