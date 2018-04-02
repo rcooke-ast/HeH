@@ -1,7 +1,11 @@
 import numpy as np
+import pdb
 
+writeit = False
 prefix = 'radiation_z1p724_uvbslope'
 slopes = ['-0.5', '0.0', '0.5']
+
+prenams = ['UVBslope', '[C/H]', 'Hescl', 'nH', 'log NHI']
 
 cd_nam = ['H', 'H+',
           'He', 'He+', 'He+2',
@@ -84,6 +88,19 @@ for slope in slopes:
         stchdata = np.append(stchdata, subdata, axis=0)
     print('Appended')
 
-print('Saving')
-np.save(prefix+'_data', stchdata)
-print('Complete')
+
+if writeit:
+    print('Saving')
+    np.save(prefix+'_data', stchdata)
+    print('Complete')
+else:
+    # Print out some random location
+    while True:
+        idx = stchdata.shape[0] * np.random.uniform(0.0, 1.0)
+        if stchdata[int(idx), 0] == 0.0:
+            break
+    for i in range(stchdata.shape[1]):
+        if i < len(prenams):
+            print(prenams[i]+" = ", stchdata[int(idx), i])
+        else:
+            print(cd_nam[i-len(prenams)] + " = ", np.log10(stchdata[int(idx), i]))

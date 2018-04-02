@@ -22,9 +22,27 @@ cd_nam = ['H', 'H+',
           'Si', 'Si+', 'Si+2', 'Si+3', 'Si+4']
 
 # Set the column density data (the zeroth element must be N(H I))
+# Fakedata
+# ('UVBslope = ', 0.0)
+# ('[C/H] = ', -1.8)
+# ('Hescl = ', 0.93000000000000005)
+# ('nH = ', -3.2000000000000002)
+# ('log NHI = ', 17.399999999999999)
+# ('H = ', 17.400038652321157)
+# ('He = ', 16.451907652754723)
+# ('C+ = ', 13.860730790524665)
+# ('C+3 = ', 15.244282069998507)
+# ('Si+ = ', 12.565506621894549)
+# ('Si+3 = ', 13.806593035830895)
 yn =          ['H',  'He', 'C+', 'C+3', 'Si+', 'Si+3']
-y  = np.array([17.2, 16.0, 13.0,  13.0,  12.0,  12.0])
-ye = np.array([ 0.1,  0.1,  0.1,   0.1,   0.1,   0.1])
+y  = np.array([17.400038652321157, 16.451907652754723, 13.860730790524665,  15.244282069998507,  12.565506621894549,  13.806593035830895])
+ye = 1.0e-4 * np.array([0.1,  0.1,  0.1,   0.1,   0.1,   0.1])
+
+# Set the real data
+# yn =          ['H',  'He', 'C+', 'C+3', 'Si+', 'Si+3']
+# y  = np.array([17.0, 16.4, 13.8,  15.2,  12.5,  13.8])
+# ye = np.array([ 0.1,  0.1,  0.1,   0.1,   0.1,   0.1])
+
 yi = []
 Ncol = y.size
 x = np.zeros(Ncol)  # A fudge - this array is not used
@@ -81,7 +99,6 @@ for i in range(Ncol):
     model_cden.append(RegularGridInterpolator(pts, vals, method='linear', bounds_error=False, fill_value=np.inf))
     # model_cden.append(LinearNDInterpolator(pts, value_cden[i], fill_value=np.inf))
 print("Complete")
-pdb.set_trace()
 
 
 def get_model(theta):
