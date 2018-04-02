@@ -22,7 +22,7 @@ cd_nam = ['H', 'H+',
           'Si', 'Si+', 'Si+2', 'Si+3', 'Si+4']
 
 # Set the column density data (the zeroth element must be N(H I))
-yn =          ['H' , 'He', 'C+', 'C+3', 'Si+', 'Si+3']
+yn =          ['H',  'He', 'C+', 'C+3', 'Si+', 'Si+3']
 y  = np.array([17.2, 16.0, 13.0,  13.0,  12.0,  12.0])
 ye = np.array([ 0.1,  0.1,  0.1,   0.1,   0.1,   0.1])
 yi = []
@@ -34,35 +34,35 @@ filename = "data/radiation_z1p724_uvbslope_data.npy"
 allmodel = np.load(filename)
 # Extract the columns that are of interest to us
 Ndims = 5  # Number of parameters to estimate
-Hcol  = allmodel[:, Ndims] + allmodel[:, Ndims+1]
+Hcol = allmodel[:, Ndims] + allmodel[:, Ndims+1]
 Hecol = allmodel[:, Ndims+2] + allmodel[:, Ndims+3]+allmodel[:, Ndims+4]
-model_met = allmodel[:, 0]
-model_yp = allmodel[:, 1] * np.median((Hecol/Hcol)/allmodel[:, 1])
-model_hden = allmodel[:, 2]
-model_NHI = allmodel[:, 3]
-model_slp = allmodel[:, 4]
+model_slp = allmodel[:, 0]
+model_met = allmodel[:, 1]
+model_yp = allmodel[:, 2] * np.median((Hecol/Hcol)/allmodel[:, 2])
+model_hden = allmodel[:, 3]
+model_NHI = allmodel[:, 4]
 
+mn_slp, mx_slp = np.min(model_slp), np.max(model_slp)
 mn_met, mx_met = np.min(model_met), np.max(model_met)
 mn_yp, mx_yp = np.min(model_yp), np.max(model_yp)
 mn_hden, mx_hden = np.min(model_hden), np.max(model_hden)
 mn_NHI, mx_NHI = np.min(model_NHI), np.max(model_NHI)
-mn_slp, mx_slp = np.min(model_slp), np.max(model_slp)
 
+unq_slp = np.unique(model_slp)
 unq_met = np.unique(model_met)
 unq_yp = np.unique(model_yp)
 unq_hden = np.unique(model_hden)
 unq_NHI = np.unique(model_NHI)
-unq_slp = np.unique(model_slp)
 
-diff = unq_yp[1:] - unq_yp[:-1]
-np.where(diff < np.median(diff))
+# diff = unq_yp[1:] - unq_yp[:-1]
+# print(np.where(diff < np.median(diff)))
 
 value_cden = []
-for i in range(len(cd_nam)):
-    for j in range(len(yn)):
-        if cd_nam[i] == yn[j]:
-            yi.append(Ndims+i)
-            value_cden.append(np.log10(allmodel[:, Ndims+i]))
+for i in range(len(yn)):
+    for j in range(len(cd_nam)):
+        if yn[i] == cd_nam[j]:
+            yi.append(Ndims+j)
+            value_cden.append(np.log10(allmodel[:, Ndims+j]))
             break
 
 if len(yi) != len(yn):
@@ -70,18 +70,18 @@ if len(yi) != len(yn):
     sys.exit()
 
 print("Preparing model grids")
-XM, XY, XH, XN, XS = np.meshgrid(unq_met, unq_yp, unq_hden, unq_NHI, unq_slp, indexing='ij')
+XS, XM, XY, XH, XN = np.meshgrid(unq_slp, unq_met, unq_yp, unq_hden, unq_NHI, indexing='ij')
 print("Interpolating model grids")
-pts = [unq_met, unq_yp, unq_hden, unq_NHI, unq_slp]
+pts = [unq_slp, unq_met, unq_yp, unq_hden, unq_NHI]
 model_cden = []
 for i in range(Ncol):
     print("{0:d}/{1:d}".format(i+1, Ncol))
-    vals = value_cden[i].reshape((unq_met.size, unq_yp.size, unq_hden.size, unq_NHI.size, unq_slp.size))
+    vals = value_cden[i].reshape((unq_slp.size, unq_met.size, unq_yp.size, unq_hden.size, unq_NHI.size))
     model_cden.append(RegularGridInterpolator(pts, vals, method='linear', bounds_error=False, fill_value=np.inf))
     # model_cden.append(LinearNDInterpolator(pts, value_cden[i], fill_value=np.inf))
 print("Complete")
-
 pdb.set_trace()
+
 
 def get_model(theta):
     model = np.zeros(Ncol)
@@ -92,7 +92,7 @@ def get_model(theta):
 
 # Define the probability function as likelihood * prior.
 def lnprior(theta):
-    m, y, n, h, s = theta
+    s, m, y, n, h = theta
     if mn_met <= m <= mx_met and \
        mn_yp <= y <= mx_yp and \
        mn_hden <= n <= mx_hden and \
@@ -142,11 +142,11 @@ ndim, nwalkers = 4, 100
 # minv_ms, maxv_ms = np.min(model_ms[bst[:printbst]]), np.max(model_ms[bst[:printbst]])
 # minv_ex, maxv_ex = np.min(model_ex[bst[:printbst]]), np.max(model_ex[bst[:printbst]])
 # minv_mx, maxv_mx = np.min(model_mx[bst[:printbst]]), np.max(model_mx[bst[:printbst]])
-pos = [np.array([np.random.uniform(mn_met, mx_met),
+pos = [np.array([np.random.uniform(mn_slp, mx_slp),
+                 np.random.uniform(mn_met, mx_met),
                  np.random.uniform(mn_yp, mx_yp),
                  np.random.uniform(mn_hden, mx_hden),
-                 np.random.normal(y[0], ye[0]),
-                 np.random.uniform(mn_slp, mx_slp)]) for i in range(nwalkers)]
+                 np.random.normal(y[0], ye[0])]) for i in range(nwalkers)]
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(x, y, ye), threads=6)
 
 # Clear and run the production chain.

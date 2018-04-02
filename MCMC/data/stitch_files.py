@@ -78,9 +78,9 @@ for slope in slopes:
 
     print('Appending...')
     if stchdata is None:
-        stchdata = np.append(np.vstack((metals, hescl, hden, NHI, slps)).T, data, axis=1)
+        stchdata = np.append(np.vstack((slps, metals, hescl, hden, NHI)).T, data, axis=1)
     else:
-        subdata = np.append(np.vstack((metals, hescl, hden, NHI, slps)).T, data, axis=1)
+        subdata = np.append(np.vstack((slps, metals, hescl, hden, NHI)).T, data, axis=1)
         stchdata = np.append(stchdata, subdata, axis=0)
     print('Appended')
 
