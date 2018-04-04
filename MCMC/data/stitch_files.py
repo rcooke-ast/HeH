@@ -3,7 +3,7 @@ import pdb
 
 writeit = False
 prefix = 'radiation_z1p724_uvbslope'
-slopes = ['-0.5', '0.0', '0.5']
+slopes = ['-1.0', '-0.75', '-0.5', '-0.25', '0.0', '0.25', '0.5', '0.75', '1.0']
 
 prenams = ['UVBslope', '[C/H]', 'Hescl', 'nH', 'log NHI']
 

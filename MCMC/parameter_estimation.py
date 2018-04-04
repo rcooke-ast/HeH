@@ -29,14 +29,14 @@ cd_nam = ['H', 'H+',
 # ('C+3 = ', 15.244282069998507)
 # ('Si+ = ', 12.565506621894549)
 # ('Si+3 = ', 13.806593035830895)
-yn =          ['H',  'He', 'C+', 'C+3', 'Si+', 'Si+3']
-y  = np.array([17.400038652321157, 16.451907652754723, 13.860730790524665,  15.244282069998507,  12.565506621894549,  13.806593035830895])
-ye = 1.0e-4 * np.array([0.1,  0.1,  0.1,   0.1,   0.1,   0.1])
+# yn =          ['H',  'He', 'C+', 'C+3', 'Si+', 'Si+3']
+# y  = np.array([17.400038652321157, 16.451907652754723, 13.860730790524665,  15.244282069998507,  12.565506621894549,  13.806593035830895])
+# ye = 1.0e-4 * np.array([0.1,  0.1,  0.1,   0.1,   0.1,   0.1])
 
 # Set the real data
-# yn =          ['H',  'He', 'C+', 'C+3', 'Si+', 'Si+3']
-# y  = np.array([17.0, 16.4, 13.8,  15.2,  12.5,  13.8])
-# ye = np.array([ 0.1,  0.1,  0.1,   0.1,   0.1,   0.1])
+yn =          ['H',  'He', 'C+', 'C+3', 'Si+', 'Si+3']
+y  = np.array([16.92597690, 15.85118186, 13.18935638,  13.44597079,  12.58603867,  13.00204134])
+ye = np.array([ 0.03607413,  0.05467462,  0.04316907,   0.04703529,   0.05889477,   0.02757692])
 
 yi = []
 Ncol = y.size
@@ -181,8 +181,8 @@ sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(x, y, ye), threads
 
 # Clear and run the production chain.
 print("Running MCMC...")
-nmbr = 100
-a=time.time()
+nmbr = 100000
+a = time.time()
 for i, result in enumerate(sampler.run_mcmc(pos, nmbr, rstate0=np.random.get_state())):
     if True:#(i+1) % 100 == 0:
         print("{0:5.1%}".format(float(i) / nmbr))

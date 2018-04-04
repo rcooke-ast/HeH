@@ -6,7 +6,7 @@ import plotting_routines as pr
 
 burnin = 0
 ndim = 6
-chains = np.load('samples100.npy')
+chains = np.load('samples1000.npy')
 samples = chains[:, burnin:, :].reshape((-1, ndim))
 prenams = ['[C/Si]', 'UVBslope', '[C/H]', 'yp', 'nH', 'log NHI']
 
