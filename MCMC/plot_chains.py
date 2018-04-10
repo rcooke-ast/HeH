@@ -4,9 +4,9 @@ import matplotlib.pyplot as pl
 from matplotlib.ticker import MaxNLocator
 import plotting_routines as pr
 
-burnin = 0
+burnin = 1000
 ndim = 6
-chains = np.load('samples1000.npy')
+chains = np.load('samples10000.npy')
 samples = chains[:, burnin:, :].reshape((-1, ndim))
 prenams = ['[C/Si]', 'UVBslope', '[C/H]', 'yp', 'nH', 'log NHI']
 
@@ -29,7 +29,7 @@ contour_kwargs["linewidths"] = [1.0, 1.0]
 contourf_kwargs["colors"] = ((1, 1, 1), (0.6, 0.6, 0.6), (0.3, 0.3, 0.3))
 fig = corner.corner(samples, bins=[200, 50, 50, 50, 50, 50], levels=levels, plot_datapoints=False, fill_contours=True,
                     plot_density=False, contour_kwargs=contour_kwargs, contourf_kwargs=contourf_kwargs, smooth=1,
-                    labels=[r"[C/Si]", r"$\alpha_{\rm UV}$", r"[C/H]", r"$y_{\rm P}$", r"$n_{\rm H}~({\rm cm}^{-3})$", r"log~$N$(H\,\textsc{i})~$({\rm cm}^{-2})$"])
+                    labels=[r"[C/Si]", r"$\alpha_{\rm UV}$", r"[C/H]", r"$y_{\rm P}$", r"$n_{\rm H}~({\rm cm}^{-3})$", r"log~$N$(H\,\textsc{i})/${\rm cm}^{-2}$"])
 axes = np.array(fig.axes).reshape((6, 6))
 # [axes[i,0].set_xlim(18.0,23.0) for i in range(3)]
 # [axes[i,1].set_xlim(0.3,10.0) for i in range(3)]

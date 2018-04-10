@@ -181,7 +181,7 @@ sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(x, y, ye), threads
 
 # Clear and run the production chain.
 print("Running MCMC...")
-nmbr = 100000
+nmbr = 11000
 a = time.time()
 for i, result in enumerate(sampler.run_mcmc(pos, nmbr, rstate0=np.random.get_state())):
     if True:#(i+1) % 100 == 0:
