@@ -20,16 +20,16 @@ prenams = ['[C/Si]', 'redshift', '[C/H]', 'yp', 'nH', 'log NHI']
 
 # Plot the timeline
 if True:
-	pl.clf()
-	fig, axes = pl.subplots(ndim, 1, sharex=True, figsize=(8, 9))
-	for i in range(ndim):
-		axes[i].plot(chains[:, :, i].T, color="k", alpha=0.4)
-		axes[i].yaxis.set_major_locator(MaxNLocator(5))
-		#axes[i].axhline(modvals[i], color="#888888", lw=2)
-		axes[i].axvline(burnin, color="r", lw=2)
-		axes[i].set_ylabel(prenams[i])
-	fig.tight_layout(h_pad=0.0)
-	fig.savefig("time_evolution.png")
+    pl.clf()
+    fig, axes = pl.subplots(ndim, 1, sharex=True, figsize=(8, 9))
+    for i in range(ndim):
+        axes[i].plot(chains[:, :, i].T, color="k", alpha=0.4)
+        axes[i].yaxis.set_major_locator(MaxNLocator(5))
+        #axes[i].axhline(modvals[i], color="#888888", lw=2)
+        axes[i].axvline(burnin, color="r", lw=2)
+        axes[i].set_ylabel(prenams[i])
+    fig.tight_layout(h_pad=0.0)
+    fig.savefig("time_evolution.png")
 
 # Make the triangle plot.
 levels = 1.0 - np.exp(-0.5 * np.arange(1.0, 2.1, 1.0) ** 2)
@@ -53,24 +53,24 @@ for aa in range(ndim):
 
 # Set the limits and tick locations (the fast and last element represent limits, the inner values represent tick locations)
 if False:
-	lims_CSi = [0.1, 0.2, 0.3, 0.4, 0.45]
-	#lims_zeff = [0.0, 0.6, 1.2, 1.8, 2.4, 2.7]
-	lims_zeff = [-4.0, -2.0, -1.5, -1.0, -0.5, 0.0]
-	lims_CH = [-1.85, -1.8, -1.7, -1.6, -1.53]
-	lims_yp = [0.054, 0.06, 0.08, 0.10, 0.12, 0.125]
-	lims_nH = [-2.9, -2.7, -2.4, -2.1, -2.0]
-	lims_NHI = [16.77, 16.8, 16.9, 17.0, 17.03]
-	lims = [lims_CSi, lims_zeff, lims_CH, lims_yp, lims_nH, lims_NHI]
-	#for xx in range(ndim):
-	#	[axes[i,xx].set_xlim(lims[xx][0], lims[xx][-1]) for i in range(xx)]
-	#	[axes[i,xx].set_xticks(lims[xx][1:-1]) for i in range(xx)]
-	for xx in range(ndim):
-		[axes[xx,i].set_xlim(lims[i][0], lims[i][-1]) for i in range(xx+1)]
-		[axes[xx,i].set_xticks(lims[i][1:-1]) for i in range(xx+1)]
-	for xx in range(1,ndim):
-		[axes[xx,i].set_ylim(lims[xx][0], lims[xx][-1]) for i in range(xx)]
-		[axes[xx,i].set_yticks(lims[xx][1:-1]) for i in range(xx)]
-		[axes[xx,i].tick_params(bottom=True, top=True, left=True, right=True) for i in range(xx)]
+    lims_CSi = [0.1, 0.2, 0.3, 0.4, 0.45]
+    #lims_zeff = [0.0, 0.6, 1.2, 1.8, 2.4, 2.7]
+    lims_zeff = [-4.0, -2.0, -1.5, -1.0, -0.5, 0.0]
+    lims_CH = [-1.85, -1.8, -1.7, -1.6, -1.53]
+    lims_yp = [0.054, 0.06, 0.08, 0.10, 0.12, 0.125]
+    lims_nH = [-2.9, -2.7, -2.4, -2.1, -2.0]
+    lims_NHI = [16.77, 16.8, 16.9, 17.0, 17.03]
+    lims = [lims_CSi, lims_zeff, lims_CH, lims_yp, lims_nH, lims_NHI]
+    #for xx in range(ndim):
+    #	[axes[i,xx].set_xlim(lims[xx][0], lims[xx][-1]) for i in range(xx)]
+    #	[axes[i,xx].set_xticks(lims[xx][1:-1]) for i in range(xx)]
+    for xx in range(ndim):
+        [axes[xx,i].set_xlim(lims[i][0], lims[i][-1]) for i in range(xx+1)]
+        [axes[xx,i].set_xticks(lims[i][1:-1]) for i in range(xx+1)]
+    for xx in range(1,ndim):
+        [axes[xx,i].set_ylim(lims[xx][0], lims[xx][-1]) for i in range(xx)]
+        [axes[xx,i].set_yticks(lims[xx][1:-1]) for i in range(xx)]
+        [axes[xx,i].tick_params(bottom=True, top=True, left=True, right=True) for i in range(xx)]
 
 # Draw the canvas
 fig.canvas.draw()
@@ -79,33 +79,33 @@ fig.canvas.draw()
 [axes[-1, i].xaxis.set_label_coords(0.5, -0.2) for i in range(ndim)]
 pr.plot_pm(axes[-1, 0], xy="x", zero=False)
 for aa in range(1, ndim):
-	for bb in range(aa):
-		pr.replot_ticks(axes[aa, bb])
+    for bb in range(aa):
+        pr.replot_ticks(axes[aa, bb])
 
 fig.savefig("parameter_estimation_FIXED1Ryd.pdf")
 
 if onevar >= 0:
-	# Just plot a single parameter as a function of all the other parameters
-	fig2=plt.figure(figsize=(3.504, 6.0))
-	
-	gs = gridspec.GridSpec(3, 2)
-	#gs.update(wspace=0.025, hspace=0.05) # set the spacing between axes.
-	gs.update(left=0.16, right=0.98, top=0.98, bottom = 0.07, wspace=0.025, hspace=0.05)
+    # Just plot a single parameter as a function of all the other parameters
+    fig2=plt.figure(figsize=(3.504, 6.0))
 
-	# Add each subplot
-	ax1 = fig2.add_subplot(gs[0])
+    gs = gridspec.GridSpec(3, 2)
+    #gs.update(wspace=0.025, hspace=0.05) # set the spacing between axes.
+    gs.update(left=0.16, right=0.98, top=0.98, bottom = 0.07, wspace=0.025, hspace=0.05)
 
-	for i in range(1, ndim):
-		axes[i, onevar].remove()
-		axes[i, onevar].figure = fig2
-		fig2.axes.append(axes[i, onevar])
-		fig2.add_axes(axes[i, onevar])
+    # Add each subplot
+    ax1 = fig2.add_subplot(gs[0])
 
-		dummy = fig2.add_subplot(gs[i])
-		axes[i, onevar].set_position(dummy.get_position())
-		dummy.remove()
-	plt.close(fig)
-	fig2.savefig("parameter_estimation_onevar.pdf")
+    for i in range(1, ndim):
+        axes[i, onevar].remove()
+        axes[i, onevar].figure = fig2
+        fig2.axes.append(axes[i, onevar])
+        fig2.add_axes(axes[i, onevar])
+
+        dummy = fig2.add_subplot(gs[i])
+        axes[i, onevar].set_position(dummy.get_position())
+        dummy.remove()
+    plt.close(fig)
+    fig2.savefig("parameter_estimation_onevar.pdf")
 
 
 #[([tk.set_visible(True) for tk in ax.get_yticklabels()], [tk.set_visible(True) for tk in ax.get_yticklabels()]) for ax in axes.flatten()]
