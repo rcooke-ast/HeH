@@ -2,8 +2,12 @@ import numpy as np
 import pdb
 
 writeit = True
+#dir = 'FIXED_IonPar'
+dir = 'FIXED1Ryd'
 prefix = 'radiation_z1p724_uvbslope'
+#slopes = ['-2.5', '-2.0', '-1.5', '-1.0', '-0.75', '-0.5', '-0.25', '0.0', '0.25', '0.5', '0.75', '1.0']
 slopes = ['-1.0', '-0.75', '-0.5', '-0.25', '0.0', '0.25', '0.5', '0.75', '1.0']
+#slopes = ['0.0']
 
 prenams = ['UVBslope', '[C/H]', 'Hescl', 'nH', 'log NHI']
 
@@ -72,12 +76,12 @@ for i in cd_nam:
 stchdata = None
 for slope in slopes:
     fname = '{0:s}{1:s}'.format(prefix, slope)
-    print('Preparing to stitch {0:s}'.format(fname))
-    metals, hescl, hden, NHI = np.loadtxt(fname + '.grd', unpack=True, usecols=(6, 7, 8, 9))
+    print('Preparing to stitch {0:s}'.format(dir + '/' + fname))
+    metals, hescl, hden, NHI = np.loadtxt(dir + '/' + fname + '.grd', unpack=True, usecols=(6, 7, 8, 9))
     slps = np.ones_like(metals) * float(slope)
 
     print('Loading...')
-    data = np.loadtxt(fname+'.clm', usecols=tuple(cd_idx))
+    data = np.loadtxt(dir + '/' + fname+'.clm', usecols=tuple(cd_idx))
     print('loaded')
 
     print('Appending...')
@@ -91,7 +95,7 @@ for slope in slopes:
 
 if writeit:
     print('Saving')
-    np.save(prefix+'_data', stchdata)
+    np.save(dir + '_' + prefix+'_data', stchdata)
     print('Complete')
 else:
     # Print out some random location
