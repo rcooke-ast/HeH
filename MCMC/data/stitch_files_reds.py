@@ -97,15 +97,15 @@ if writeit:
 else:
     # Print out some random location
     while True:
-		while True:
-			idx = stchdata.shape[0] * np.random.uniform(0.0, 1.0)
-			if stchdata[int(idx), 0] == 2.0:
-				break
-		for i in range(stchdata.shape[1]):
-			if i < len(prenams):
-				print(prenams[i]+" = ", stchdata[int(idx), i])
-			else:
-				print(cd_nam[i-len(prenams)] + " = ", np.log10(stchdata[int(idx), i]))
-		ans = raw_input("continue (y/n)...  ")
-		if ans == 'n':
-			break
+        while True:
+            idx = stchdata.shape[0] * np.random.uniform(0.0, 1.0)
+            if stchdata[int(idx), 0] == 2.0:
+                break
+        for i in range(stchdata.shape[1]):
+            if i < len(prenams):
+                print(prenams[i]+" = ", stchdata[int(idx), i])
+            else:
+                print(cd_nam[i-len(prenams)] + " = ", np.log10(stchdata[int(idx), i]))
+        ans = raw_input("continue (y/n)...  ")
+        if ans == 'n':
+            break
