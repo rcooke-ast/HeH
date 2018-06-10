@@ -43,7 +43,9 @@ Ncol = y.size
 x = np.zeros(Ncol)  # A fudge - this array is not used
 
 # Load the model
-filename = "data/radiation_z1p724_uvbslope_data.npy"
+#modtyp = 'FIXED_IonPar'
+modtyp = 'FIXED1Ryd'
+filename = "data/{0:s}_radiation_z1p724_uvbslope_data.npy".format(modtyp)
 allmodel = np.load(filename)
 # Extract the columns that are of interest to us
 Ndims = 5  # Number of parameters to estimate
@@ -68,6 +70,7 @@ unq_yp = np.unique(model_yp)
 unq_hden = np.unique(model_hden)
 unq_NHI = np.unique(model_NHI)
 
+mn_slp, mx_slp = -1.0E-4, 1.0E-4
 # diff = unq_yp[1:] - unq_yp[:-1]
 # print(np.where(diff < np.median(diff)))
 
@@ -93,7 +96,7 @@ if True:
     for i in range(Ncol):
         print("{0:d}/{1:d}".format(i+1, Ncol))
         vals = value_cden[i].reshape((unq_slp.size, unq_met.size, unq_yp.size, unq_hden.size, unq_NHI.size))
-        model_cden.append(RegularGridInterpolator(pts, vals, method='linear', bounds_error=False, fill_value=np.inf))
+        model_cden.append(RegularGridInterpolator(pts, vals, method='linear', bounds_error=False, fill_value=-np.inf))
         # model_cden.append(LinearNDInterpolator(pts, value_cden[i], fill_value=np.inf))
     print("Complete")
 else:
@@ -119,9 +122,9 @@ def get_model(theta):
 
 # Define the probability function as likelihood * prior.
 def lnprior(theta):
-    r, s, m, y, n, h = theta
+    r, s, m, yy, n, h = theta
     if mn_met <= m <= mx_met and \
-       mn_yp <= y <= mx_yp and \
+       mn_yp <= yy <= mx_yp and \
        mn_hden <= n <= mx_hden and \
        mn_NHI <= h <= mx_NHI and \
        mn_sic <= r <= mx_sic and \
@@ -181,7 +184,8 @@ sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(x, y, ye), threads
 
 # Clear and run the production chain.
 print("Running MCMC...")
-nmbr = 11000
+#nmbr = 11000
+nmbr = 3000
 a = time.time()
 for i, result in enumerate(sampler.run_mcmc(pos, nmbr, rstate0=np.random.get_state())):
     if True:#(i+1) % 100 == 0:
@@ -190,4 +194,4 @@ print("Done.")
 print((time.time()-a)/60.0, 'mins')
 
 print("Saving samples")
-np.save("samples{0:d}.npy".format(nmbr), sampler.chain)
+np.save("{0:s}_samples{1:d}.npy".format(modtyp, nmbr), sampler.chain)
